@@ -6,12 +6,13 @@
 		facing: Facing
 		style?: string
 		class?: string
+		onclick?: (card?: Card | null) => void
 	}
 
-	const { card, facing, class: className = '', style = '' }: Props = $props()
+	const { card, facing, class: className = '', style = '', onclick = () => {} }: Props = $props()
 </script>
 
-<div class="card-wrapper group relative {className}" {style}>
+<button class="card-wrapper group relative {className}" {style} onclick={() => onclick?.(card)}>
 	<div
 		class:!bg-white={card == null}
 		class="card absolute left-0 flex flex-col justify-between overflow-hidden"
@@ -36,13 +37,13 @@
 			</div>
 		{/if}
 	</div>
-</div>
+</button>
 
 <style lang="postcss">
 	@reference "tailwindcss";
 
 	.card-wrapper {
-		@apply relative h-32 w-24 shrink overflow-visible select-none;
+		@apply relative flex h-32 w-24 shrink overflow-visible select-none;
 		@apply group-hover:mx-5;
 	}
 

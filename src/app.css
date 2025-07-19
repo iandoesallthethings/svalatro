@@ -1,2 +1,20 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+
+button.primary {
+	@apply w-min rounded-md bg-blue-500 px-4 py-2 text-white;
+	@apply hover:bg-blue-600;
+	@apply disabled:bg-blue-300;
+}
+
+button.secondary {
+	@apply w-min rounded-md bg-gray-300 px-4 py-2 text-black;
+	@apply hover:bg-gray-400;
+	@apply disabled:bg-gray-200;
+}
+
+button.danger {
+	@apply w-min rounded-md bg-red-500 px-4 py-2 text-white;
+	@apply hover:bg-red-600;
+	@apply disabled:bg-red-300;
+}
