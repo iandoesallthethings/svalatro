@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { suits, type Card, type Facing } from './Cards.svelte'
+	import { suits, type Card, type Facing } from './Cards'
 
 	interface Props {
 		card: Card | null
@@ -12,7 +12,7 @@
 	const { card, facing, class: className = '', style = '', onclick = () => {} }: Props = $props()
 </script>
 
-<button class="card-wrapper group relative {className}" {style} onclick={() => onclick?.(card)}>
+<button class="card-wrapper group {className}" {style} onclick={() => onclick?.(card)}>
 	<div
 		class:!bg-white={card == null}
 		class="card absolute left-0 flex flex-col justify-between overflow-hidden"

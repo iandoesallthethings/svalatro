@@ -1,4 +1,4 @@
-import { type Card, faceToValue } from './Cards.svelte'
+import { type Card, faceToValue } from './Cards'
 
 class PokerHand {
 	name: string
@@ -34,7 +34,7 @@ export function findViableHands(cards: Card[]): ScoredHand[] {
 		.map((hand) => ({
 			hand,
 			cards: hand.validate(cards),
-			baseScore: hand.score(hand.validate(cards))
+			baseScore: hand.baseChips * hand.baseMult
 		}))
 		.filter((hand) => hand.cards.length > 0)
 		.toSorted((a, b) => b.baseScore - a.baseScore)

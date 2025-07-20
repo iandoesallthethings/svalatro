@@ -4,6 +4,6 @@
 	let { children } = $props()
 </script>
 
-<main class="h-screen w-screen overflow-hidden">
+<main class="flex h-screen w-screen flex-col overflow-hidden">
 	{@render children()}
 </main>

@@ -1,20 +1,40 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+button:not(.unstyled) {
+	@apply w-min rounded px-4 py-2 whitespace-nowrap shadow;
+}
+
 button.primary {
-	@apply w-min rounded-md bg-blue-500 px-4 py-2 text-white;
+	@apply bg-blue-500 text-white;
 	@apply hover:bg-blue-600;
 	@apply disabled:bg-blue-300;
 }
 
 button.secondary {
-	@apply w-min rounded-md bg-gray-300 px-4 py-2 text-black;
+	@apply bg-gray-300 text-black;
 	@apply hover:bg-gray-400;
 	@apply disabled:bg-gray-200;
 }
 
 button.danger {
-	@apply w-min rounded-md bg-red-500 px-4 py-2 text-white;
+	@apply bg-red-500 text-white;
 	@apply hover:bg-red-600;
 	@apply disabled:bg-red-300;
+}
+
+h1 {
+	@apply text-2xl font-bold;
+}
+
+h2 {
+	@apply text-xl font-bold;
+}
+
+h3 {
+	@apply text-lg font-bold;
+}
+
+h4 {
+	@apply text-base font-bold;
 }

@@ -1,14 +1,24 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
-	import { allSuits, allRanks, cardStack, type Card } from '$lib/Cards.svelte'
-	import { findViableHands } from '$lib/Scores.svelte'
+	import type { Card } from '$lib/Cards'
+	import { createCardStack } from '$lib/CardStack.svelte'
+	import * as Decks from '$lib/Decks'
+	import Dialog from '$lib/Dialog.svelte'
+	import { findViableHands } from '$lib/Scores'
 	import Stack from '$lib/Stack.svelte'
+	import * as Strings from '$lib/Strings'
 
 	const GOAL_SCORE = 300
 
-	const deck = cardStack(allSuits, allRanks)
-	const hand = cardStack()
-	const discard = cardStack()
+	const deck = createCardStack(Decks.standardDeck())
+	const hand = createCardStack()
+	const discard = createCardStack()
+
+	// Placeholder - not sure if I'll use the same hook
+	const jokers = createCardStack()
+	const consumables = createCardStack()
+
+	let showDialog = $state<'win' | 'lose' | false>(false)
 
 	let roundScore = $state(0)
 	let handsLeft = $state(4)
@@ -43,14 +53,17 @@
 
 	function playSelected() {
 		if (handsLeft === 0) return
-		roundScore += scores[0]?.baseScore ?? 0
+		const { hand, cards } = scores[0]
+		const actualScore = hand.score(hand.validate(cards))
+		roundScore += actualScore
+
 		discardAndDraw()
 		handsLeft--
 
 		if (roundScore >= GOAL_SCORE) {
-			alert('You win!')
+			showDialog = 'win'
 		} else if (handsLeft === 0) {
-			alert('You lose!')
+			showDialog = 'lose'
 		}
 	}
 
@@ -79,59 +92,112 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col justify-center gap-1 p-4 ring">
-	<div class="flex flex-col gap-1">
-		<p>Goal: {GOAL_SCORE}</p>
-		<p>Round: {roundScore}</p>
-		<p>Current Hand: {scores[0]?.hand.name ?? 'None'} {scores[0]?.baseScore ?? 0}</p>
-		<p>Hands: {handsLeft}</p>
-		<p>Discards: {discardsLeft}</p>
+<Dialog show={showDialog !== false}>
+	<h1>{showDialog === 'win' ? 'You win!' : 'You lose!'}</h1>
+	<div>You scored {roundScore} points.</div>
+	<button class="primary" onclick={() => (window.location.href = '/')}>Play again</button>
+</Dialog>
+
+<div class="m-auto flex w-full flex-row items-center justify-between gap-2 p-4">
+	<div class="stats flex max-w-xs flex-col gap-1">
+		<div class="flex h-20 flex-col items-center justify-center rounded-lg border">
+			<h1>Blind</h1>
+			<h1 class="text-4xl">{GOAL_SCORE}</h1>
+		</div>
+
+		<div class="flex h-20 flex-row items-center justify-center gap-2 rounded-lg border p-4">
+			<h3 class="w-1/3">Round Score</h3>
+			<h3 class="w-2/3 text-center">{roundScore}</h3>
+		</div>
+
+		<div class="flex h-20 flex-col items-center justify-center rounded-lg border">
+			<h2>{Strings.camelToTitle(scores[0]?.hand.name ?? '-')}</h2>
+
+			<div class="flex flex-row items-center justify-evenly gap-2">
+				<h2>{scores[0]?.hand.baseChips ?? 0}</h2>
+				<h2>x</h2>
+				<h2>{scores[0]?.hand.baseMult ?? 0}</h2>
+			</div>
+		</div>
+
+		<div class="flex h-20 flex-row items-center justify-evenly gap-2 rounded-lg border">
+			<div class="flex flex-col items-center justify-center">
+				<h2>Hands</h2>
+				<h2>{handsLeft}</h2>
+			</div>
+
+			<div class="flex flex-col items-center justify-center">
+				<h2>Discards</h2>
+				<h2>{discardsLeft}</h2>
+			</div>
+		</div>
 	</div>
 
-	<Stack
-		stack={hand}
-		{selected}
-		facing="up"
-		stackType="row"
-		onclick={toggleSelected}
-		label="Hand"
-	/>
+	<div class="flex grow flex-col ring">
+		<div class="flex flex-row justify-end">
+			<Stack stack={jokers} stackType="row" facing="up" label="Jokerz (not yet)" class="grow" />
+			<Stack stack={consumables} stackType="row" facing="up" label="Consumables (not yet)" />
+		</div>
 
-	<div class="flex flex-row justify-center gap-1">
-		<button onclick={() => toggleSort('rank')} class="secondary" class:ring!={handSort === 'rank'}>
-			Rank
-		</button>
-		<button onclick={() => toggleSort('suit')} class="secondary" class:ring!={handSort === 'suit'}>
-			Suit
-		</button>
-	</div>
+		<div class="flex w-full grow flex-row gap-2">
+			<div class="play-area flex w-22 grow flex-col justify-center gap-2">
+				<Stack stack={hand} {selected} facing="up" stackType="row" onclick={toggleSelected} />
 
-	<div class="flex flex-row justify-end gap-1">
-		<Stack
-			stack={deck}
-			facing="down"
-			stackType="deck"
-			label="Deck ({deck.cards.length}/{deck.initialCards.length})"
-		/>
+				<div class="controls flex flex-row justify-center gap-2">
+					<button
+						class="primary w-28! text-xl"
+						onclick={playSelected}
+						disabled={scores.length === 0 || handsLeft === 0}
+					>
+						Play
+					</button>
 
-		<Stack stack={discard} facing="up" stackType="deck" label="Discard ({discard.cards.length})" />
-	</div>
+					<div class="flex flex-col items-center gap-1 rounded-lg border p-2">
+						<div>Sort Hand</div>
+						<div class="flex flex-row gap-1">
+							<button
+								onclick={() => toggleSort('rank')}
+								class="secondary"
+								class:ring!={handSort === 'rank'}
+							>
+								Rank
+							</button>
 
-	<div class="flex flex-row justify-center gap-1">
-		<button
-			class="primary"
-			onclick={playSelected}
-			disabled={scores.length === 0 || handsLeft === 0}
-		>
-			Play
-		</button>
+							<button
+								onclick={() => toggleSort('suit')}
+								class="secondary"
+								class:ring!={handSort === 'suit'}
+							>
+								Suit
+							</button>
+						</div>
+					</div>
 
-		<button
-			class="danger"
-			onclick={discardSelected}
-			disabled={selected.length === 0 || discardsLeft === 0}
-		>
-			Discard
-		</button>
+					<button
+						class="danger w-28! text-xl"
+						onclick={discardSelected}
+						disabled={selected.length === 0 || discardsLeft === 0}
+					>
+						Discard
+					</button>
+				</div>
+			</div>
+
+			<div class="deck-area flex h-full flex-col justify-end gap-2 p-2">
+				<Stack
+					stack={deck}
+					facing="down"
+					stackType="deck"
+					label="Deck ({deck.cards.length}/{deck.initialCards.length})"
+				/>
+
+				<Stack
+					stack={discard}
+					facing="up"
+					stackType="deck"
+					label="Discard ({discard.cards.length})"
+				/>
+			</div>
+		</div>
 	</div>
 </div>

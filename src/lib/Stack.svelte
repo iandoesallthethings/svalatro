@@ -1,6 +1,8 @@
 <script lang="ts">
-	import type { CardStack, Facing, StackType, Card } from './Cards.svelte'
+	import type { Facing, StackType, Card } from './Cards'
 	import CardComponent from './Card.svelte'
+	import { type CardStack } from './CardStack.svelte'
+	import { flip } from 'svelte/animate'
 
 	interface Props {
 		stack: CardStack
@@ -9,6 +11,7 @@
 		stackType: StackType
 		label?: string
 		onclick?: (card?: Card | null) => void
+		class?: string
 	}
 
 	const {
@@ -17,7 +20,8 @@
 		facing,
 		stackType,
 		label,
-		onclick = (_card?: Card | null) => {}
+		onclick = (_card?: Card | null) => {},
+		class: className = ''
 	}: Props = $props()
 
 	function fakeCardStack(count: number) {
@@ -26,9 +30,9 @@
 	}
 </script>
 
-<div class="flex flex-col gap-1">
+<div class="flex flex-col gap-1 {className}">
 	{#if stackType === 'deck'}
-		<div class="relative flex flex-col gap-2">
+		<div class="relative flex flex-col gap-2 pb-2">
 			<CardComponent
 				card={stack.cards[0] ?? null}
 				{facing}
@@ -48,26 +52,24 @@
 		</div>
 	{:else if stackType === 'row'}
 		<div
-			class="flex w-full flex-row flex-nowrap justify-start gap-4 overflow-x-auto overflow-y-visible pt-4 pr-24"
+			class="flex w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto overflow-y-visible pt-8 pr-24 pb-4 pl-4"
 		>
 			{#if stack.cards.length === 0}
 				<CardComponent card={null} facing="down" />
 			{/if}
 
 			{#each stack.cards as card (card.id)}
-				{@const isSelected = selected?.some((selectedCard) => selectedCard.id === card.id)}
 				<CardComponent
 					{card}
 					{facing}
 					onclick={() => onclick(card)}
-					class={isSelected ? '-translate-y-2' : ''}
+					class="
+						transition-all
+						{selected?.some((selectedCard) => selectedCard.id === card.id) ? '-translate-y-8' : ''}
+					"
 				/>
-			{/each}
-		</div>
-	{:else if stackType === 'column'}
-		<div class="flex flex-col gap-2">
-			{#each stack.cards as card}
-				<CardComponent {card} {facing} />
+				<!-- <div animate:flip={{ duration: 200 }} class="relative shrink! ring">
+				</div> -->
 			{/each}
 		</div>
 	{/if}
