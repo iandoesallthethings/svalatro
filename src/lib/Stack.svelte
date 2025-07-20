@@ -77,5 +77,5 @@
 		</div>
 	{/if}
 
-	<div class="self-start text-sm text-gray-500">{label ?? '-'}</div>
+	<div class="self-start text-sm text-gray-500">{label ?? ''}</div>
 </div>

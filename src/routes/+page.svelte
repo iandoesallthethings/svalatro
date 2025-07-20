@@ -8,13 +8,15 @@
 	import Stack from '$lib/Stack.svelte'
 	import * as Strings from '$lib/Strings'
 
-	const GOAL_SCORE = 300
+	const MAX_SELECTED = 5
+	const BLIND_SCORE = 300
+	const MAX_JOKERS = 5
+	const MAX_CONSUMABLES = 2
 
 	const deck = createCardStack(Decks.standardDeck())
 	const hand = createCardStack()
 	const discard = createCardStack()
-
-	// Placeholder - not sure if I'll use the same hook
+	// Placeholders - not sure if I'll use the same hook
 	const jokers = createCardStack()
 	const consumables = createCardStack()
 
@@ -60,7 +62,7 @@
 		discardAndDraw()
 		handsLeft--
 
-		if (roundScore >= GOAL_SCORE) {
+		if (roundScore >= BLIND_SCORE) {
 			showDialog = 'win'
 		} else if (handsLeft === 0) {
 			showDialog = 'lose'
@@ -80,7 +82,6 @@
 		selected = []
 	}
 
-	const MAX_SELECTED = 5
 	function toggleSelected(card?: Card | null) {
 		if (card == null) return
 		const isAlreadySelected = selected.some((selectedCard) => selectedCard.id === card.id)
@@ -95,14 +96,20 @@
 <Dialog show={showDialog !== false}>
 	<h1>{showDialog === 'win' ? 'You win!' : 'You lose!'}</h1>
 	<div>You scored {roundScore} points.</div>
-	<button class="primary" onclick={() => (window.location.href = '/')}>Play again</button>
+
+	<button class="primary" onclick={() => (window.location.href = '/')}>
+		{showDialog === 'win' ? 'Play' : 'Try'} again
+	</button>
 </Dialog>
 
 <div class="m-auto flex w-full flex-row items-center justify-between gap-2 p-4">
-	<div class="stats flex max-w-xs flex-col gap-1">
+	<div class="stats flex h-full max-w-xs flex-col gap-1 rounded p-2 ring">
+		<div class="p-4">
+			<h1 class="text-center text-4xl!">Svalatro</h1>
+		</div>
 		<div class="flex h-20 flex-col items-center justify-center rounded-lg border">
 			<h1>Blind</h1>
-			<h1 class="text-4xl">{GOAL_SCORE}</h1>
+			<h1 class="text-4xl">{BLIND_SCORE}</h1>
 		</div>
 
 		<div class="flex h-20 flex-row items-center justify-center gap-2 rounded-lg border p-4">
@@ -133,10 +140,10 @@
 		</div>
 	</div>
 
-	<div class="flex grow flex-col ring">
-		<div class="flex flex-row justify-end">
-			<Stack stack={jokers} type="row" facing="up" label="Jokerz (not yet)" class="grow" />
-			<Stack stack={consumables} type="row" facing="up" label="Consumables (not yet)" />
+	<div class="flex grow flex-col">
+		<div class="flex flex-row justify-end rounded p-2 ring">
+			<Stack stack={jokers} type="row" facing="up" label="Jokerz (0/{MAX_JOKERS})" class="grow" />
+			<Stack stack={consumables} type="row" facing="up" label="Consumables (0/{MAX_CONSUMABLES})" />
 		</div>
 
 		<div class="flex w-full grow flex-row gap-2">
