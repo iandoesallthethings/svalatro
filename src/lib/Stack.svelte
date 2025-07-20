@@ -8,7 +8,7 @@
 		stack: CardStack
 		selected?: Card[]
 		facing: Facing
-		stackType: StackType
+		type: StackType
 		label?: string
 		onclick?: (card?: Card | null) => void
 		class?: string
@@ -18,7 +18,7 @@
 		stack,
 		selected = $bindable(),
 		facing,
-		stackType,
+		type,
 		label,
 		onclick = (_card?: Card | null) => {},
 		class: className = ''
@@ -30,9 +30,9 @@
 	}
 </script>
 
-<div class="flex flex-col gap-1 {className}">
-	{#if stackType === 'deck'}
-		<div class="relative flex flex-col gap-2 pb-2">
+<div class="flex flex-col gap-1 {className} pb-2">
+	{#if type === 'deck'}
+		<div class="relative flex flex-col gap-2">
 			<CardComponent
 				card={stack.cards[0] ?? null}
 				{facing}
@@ -50,31 +50,32 @@
 				/>
 			{/each}
 		</div>
-	{:else if stackType === 'row'}
+	{:else if type === 'row'}
 		<div
-			class="flex w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto overflow-y-visible pt-8 pr-24 pb-4 pl-4"
+			class="flex w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-24 pl-4"
 		>
 			{#if stack.cards.length === 0}
 				<CardComponent card={null} facing="down" />
 			{/if}
 
 			{#each stack.cards as card (card.id)}
-				<CardComponent
-					{card}
-					{facing}
-					onclick={() => onclick(card)}
-					class="
-						transition-all
-						{selected?.some((selectedCard) => selectedCard.id === card.id) ? '-translate-y-8' : ''}
-					"
-				/>
-				<!-- <div animate:flip={{ duration: 200 }} class="relative shrink! ring">
-				</div> -->
+				{@const isSelected = selected?.some((selectedCard) => selectedCard.id === card.id)}
+				<div class="group relative flex h-32 w-24 shrink" animate:flip={{ duration: 200 }}>
+					<CardComponent
+						{card}
+						{facing}
+						onclick={() => onclick(card)}
+						class="
+							absolute top-0 left-0 transition-all 
+							group-hover:-translate-y-4 
+							group-hover:shadow-lg!
+							{isSelected ? '-translate-y-8!' : ''}
+						"
+					/>
+				</div>
 			{/each}
 		</div>
 	{/if}
 
-	{#if label}
-		<div class="self-start text-sm text-gray-500">{label}</div>
-	{/if}
+	<div class="self-start text-sm text-gray-500">{label ?? '-'}</div>
 </div>

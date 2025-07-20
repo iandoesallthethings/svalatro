@@ -135,13 +135,13 @@
 
 	<div class="flex grow flex-col ring">
 		<div class="flex flex-row justify-end">
-			<Stack stack={jokers} stackType="row" facing="up" label="Jokerz (not yet)" class="grow" />
-			<Stack stack={consumables} stackType="row" facing="up" label="Consumables (not yet)" />
+			<Stack stack={jokers} type="row" facing="up" label="Jokerz (not yet)" class="grow" />
+			<Stack stack={consumables} type="row" facing="up" label="Consumables (not yet)" />
 		</div>
 
 		<div class="flex w-full grow flex-row gap-2">
 			<div class="play-area flex w-22 grow flex-col justify-center gap-2">
-				<Stack stack={hand} {selected} facing="up" stackType="row" onclick={toggleSelected} />
+				<Stack stack={hand} {selected} facing="up" type="row" onclick={toggleSelected} />
 
 				<div class="controls flex flex-row justify-center gap-2">
 					<button
@@ -187,16 +187,11 @@
 				<Stack
 					stack={deck}
 					facing="down"
-					stackType="deck"
+					type="deck"
 					label="Deck ({deck.cards.length}/{deck.initialCards.length})"
 				/>
 
-				<Stack
-					stack={discard}
-					facing="up"
-					stackType="deck"
-					label="Discard ({discard.cards.length})"
-				/>
+				<Stack stack={discard} facing="up" type="deck" label="Discard ({discard.cards.length})" />
 			</div>
 		</div>
 	</div>
