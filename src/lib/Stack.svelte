@@ -28,8 +28,13 @@
 	}: Props = $props()
 
 	function fanStyle(index: number) {
-		const angle = (index - 0.5 * stack.cards.length) * 2
-		const y = Math.abs(index - 0.5 * stack.cards.length) * 2
+		const derp = stack.cards.length % 2 === 0 ? 0.5 : 1
+
+		const adjustedIndex = index + derp - 0.5 * stack.cards.length
+
+		const angle = adjustedIndex * 2
+		const y = Math.abs(adjustedIndex) * 2
+
 		return `
 			transform: 
 				rotate(${angle}deg)
