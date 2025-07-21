@@ -168,7 +168,7 @@
 
 		<div class="flex w-full grow flex-row gap-2">
 			<div class="play-area flex w-22 grow flex-col justify-center gap-2">
-				<Stack stack={hand} {selected} facing="up" type="row" onclick={toggleSelected} />
+				<Stack stack={hand} {selected} facing="up" type="row" fan={true} onclick={toggleSelected} />
 
 				<div class="controls flex flex-row justify-center gap-2">
 					<button

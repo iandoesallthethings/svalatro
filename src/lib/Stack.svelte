@@ -9,6 +9,7 @@
 		stack: CardStack
 		selected?: Card[]
 		facing: Facing
+		fan?: boolean
 		type: StackType
 		label?: string
 		onclick?: (card?: Card | null) => void
@@ -19,15 +20,21 @@
 		stack,
 		selected = $bindable(),
 		facing,
+		fan = false,
 		type,
 		label,
 		onclick = (_card?: Card | null) => {},
 		class: className = ''
 	}: Props = $props()
 
-	function fakeCardStack(count: number) {
-		const fakeCount = Math.min(count - 1, 5)
-		return Array.from({ length: fakeCount }, (_, i) => fakeCount - i - 1)
+	function fanStyle(index: number) {
+		const angle = (index - 0.5 * stack.cards.length) * 2
+		const y = Math.abs(index - 0.5 * stack.cards.length) * 2
+		return `
+			transform: 
+				rotate(${angle}deg)
+				translateY(${y}px);
+		`
 	}
 </script>
 
@@ -52,19 +59,20 @@
 		</div>
 	{:else if type === 'row'}
 		<div
-			class="flex w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-20 pl-2"
+			class="flex h-44 w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-20 pl-2"
 		>
 			{#if stack.cards.length === 0}
 				<CardComponent card={null} facing="down" class="mr-auto" />
 			{/if}
 
-			{#each stack.cards as card (card.id)}
+			{#each stack.cards as card, index (card.id)}
 				{@const isSelected = selected?.some((selectedCard) => selectedCard.id === card.id)}
 				<div
-					class="group relative flex h-32 w-24 shrink"
 					animate:flip={{ duration: 200 }}
 					in:receive={{ key: card.id }}
 					out:send={{ key: card.id }}
+					class="group relative flex h-32 w-24 shrink"
+					style={fan ? fanStyle(index) : ''}
 				>
 					<CardComponent
 						{card}
@@ -72,9 +80,9 @@
 						onclick={() => onclick(card)}
 						class="
 							absolute top-0 left-0 shadow 
+							{isSelected ? '-translate-y-8!' : ''}
 							group-hover:-translate-y-4 
 							group-hover:shadow-lg!
-							{isSelected ? '-translate-y-8!' : ''}
 						"
 					/>
 				</div>
