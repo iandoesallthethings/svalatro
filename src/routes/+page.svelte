@@ -7,6 +7,7 @@
 	import { findViableHands } from '$lib/Scores'
 	import Stack from '$lib/Stack.svelte'
 	import * as Strings from '$lib/Strings'
+	import * as Timing from '$lib/Timing'
 
 	const MAX_SELECTED = 5
 	const BLIND_SCORE = 300
@@ -34,12 +35,13 @@
 		drawToHand(8)
 	}
 
-	function drawToHand(number: number) {
-		const cards = deck.draw(number)
-		hand.add(cards, 'bottom')
+	async function drawToHand(number: number) {
+		for (const n of Array(number)) {
+			const card = deck.draw()
+			hand.add(card, 'bottom')
+			if (handSort !== 'none') hand.sort(handSort)
 
-		if (handSort !== 'none') {
-			hand.sort(handSort)
+			await Timing.wait()
 		}
 	}
 
@@ -52,14 +54,16 @@
 		}
 	}
 
-	function playSelected() {
+	async function playSelected() {
 		if (handsLeft === 0) return
 		const { hand, cards } = scores[0]
 		const actualScore = hand.score(hand.validate(cards))
 		roundScore += actualScore
 
-		discardAndDraw()
+		await discardAndDraw()
 		handsLeft--
+
+		await Timing.wait()
 
 		if (roundScore >= BLIND_SCORE) {
 			showDialog = 'win'
@@ -68,17 +72,20 @@
 		}
 	}
 
-	function discardSelected() {
+	async function discardSelected() {
 		if (discardsLeft === 0) return
-		discardAndDraw()
+		await discardAndDraw()
 		discardsLeft--
 	}
 
 	async function discardAndDraw() {
-		hand.remove(selected)
-		discard.add(selected)
-		await new Promise((resolve) => setTimeout(resolve, 200))
-		drawToHand(selected.length)
+		for (const card of selected) {
+			hand.remove(card)
+			discard.add(card)
+			await Timing.wait()
+		}
+
+		await drawToHand(selected.length)
 		selected = []
 	}
 
@@ -103,23 +110,22 @@
 </Dialog>
 
 <div class="m-auto flex w-full flex-row items-center justify-between gap-2 p-4">
-	<div
-		class="stats flex h-full max-w-xs flex-col gap-2 rounded bg-gray-800 p-2 text-gray-300 shadow"
-	>
-		<div class="p-4">
+	<div class="panel flex h-full max-w-xs flex-col gap-2">
+		<div class="p-2">
 			<h1 class="text-center text-4xl!">Svalatro</h1>
 		</div>
-		<div class="flex h-20 flex-col items-center justify-center rounded-lg border">
+
+		<div class="stat-card">
 			<h1>Blind</h1>
 			<h1 class="text-4xl">{BLIND_SCORE}</h1>
 		</div>
 
-		<div class="flex h-20 flex-row items-center justify-center gap-2 rounded-lg border p-4">
+		<div class="stat-card">
 			<h3 class="w-1/3">Round Score</h3>
 			<h3 class="w-2/3 text-center">{roundScore}</h3>
 		</div>
 
-		<div class="flex h-20 flex-col items-center justify-center rounded-lg border">
+		<div class="stat-card flex-col">
 			<h2>{Strings.camelToTitle(scores[0]?.hand.name ?? '-')}</h2>
 
 			<div class="flex flex-row items-center justify-evenly gap-2">
@@ -129,7 +135,7 @@
 			</div>
 		</div>
 
-		<div class="flex h-20 flex-row items-center justify-evenly gap-2 rounded-lg border">
+		<div class="stat-card">
 			<div class="flex flex-col items-center justify-center">
 				<h2>Hands</h2>
 				<h2>{handsLeft}</h2>
@@ -143,9 +149,21 @@
 	</div>
 
 	<div class="flex grow flex-col">
-		<div class="flex flex-row justify-end rounded bg-gray-800 p-2">
-			<Stack stack={jokers} type="row" facing="up" label="Jokerz (0/{MAX_JOKERS})" class="grow" />
-			<Stack stack={consumables} type="row" facing="up" label="Consumables (0/{MAX_CONSUMABLES})" />
+		<div class="flex flex-row justify-end gap-2">
+			<Stack
+				stack={jokers}
+				type="row"
+				facing="up"
+				label="Jokerz (0/{MAX_JOKERS})"
+				class="panel grow"
+			/>
+			<Stack
+				stack={consumables}
+				type="row"
+				facing="up"
+				label="Consumables (0/{MAX_CONSUMABLES})"
+				class="panel"
+			/>
 		</div>
 
 		<div class="flex w-full grow flex-row gap-2">
@@ -205,3 +223,7 @@
 		</div>
 	</div>
 </div>
+
+<style lang="postcss">
+	@reference "tailwindcss";
+</style>

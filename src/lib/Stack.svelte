@@ -52,10 +52,10 @@
 		</div>
 	{:else if type === 'row'}
 		<div
-			class="flex w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-24 pl-4"
+			class="flex w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-16 pl-2"
 		>
 			{#if stack.cards.length === 0}
-				<CardComponent card={null} facing="down" />
+				<CardComponent card={null} facing="down" class="mr-auto" />
 			{/if}
 
 			{#each stack.cards as card (card.id)}
