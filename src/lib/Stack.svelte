@@ -3,6 +3,7 @@
 	import CardComponent from './Card.svelte'
 	import { type CardStack } from './CardStack.svelte'
 	import { flip } from 'svelte/animate'
+	import { receive, send } from './transition'
 
 	interface Props {
 		stack: CardStack
@@ -32,22 +33,21 @@
 
 <div class="flex flex-col gap-1 {className} pb-2">
 	{#if type === 'deck'}
-		<div class="relative flex flex-col gap-2">
-			<CardComponent
-				card={stack.cards[0] ?? null}
-				{facing}
-				onclick={() => onclick(stack.cards[0])}
-				class="z-10"
-			/>
+		<div class="relative mt-4 flex h-32 w-24 flex-col gap-2">
+			{#if stack.cards.length === 0}
+				<CardComponent card={null} facing="down" />
+			{/if}
 
-			<!-- Dummy cards to make it look like a deck -->
-			{#each fakeCardStack(stack.cards.length) as offset}
-				<CardComponent
-					card={{ suit: 'spades', rank: 'A', id: 'dummy' }}
-					facing="down"
-					class="pointer-events-none absolute!"
-					style="left: -{offset + 1}px; top: {offset + 1}px"
-				/>
+			{#each stack.cards.toReversed() as card, offset (card.id)}
+				<div
+					animate:flip={{ duration: 200 }}
+					in:receive={{ key: card.id }}
+					out:send={{ key: card.id }}
+					class="absolute flex h-32 w-24"
+					style="left: {offset / 4}px; top: -{offset / 4}px;"
+				>
+					<CardComponent {card} {facing} class="shadow-sm" />
+				</div>
 			{/each}
 		</div>
 	{:else if type === 'row'}
@@ -60,13 +60,18 @@
 
 			{#each stack.cards as card (card.id)}
 				{@const isSelected = selected?.some((selectedCard) => selectedCard.id === card.id)}
-				<div class="group relative flex h-32 w-24 shrink" animate:flip={{ duration: 200 }}>
+				<div
+					class="group relative flex h-32 w-24 shrink"
+					animate:flip={{ duration: 200 }}
+					in:receive={{ key: card.id }}
+					out:send={{ key: card.id }}
+				>
 					<CardComponent
 						{card}
 						{facing}
 						onclick={() => onclick(card)}
 						class="
-							absolute top-0 left-0 transition-all 
+							absolute top-0 left-0 shadow 
 							group-hover:-translate-y-4 
 							group-hover:shadow-lg!
 							{isSelected ? '-translate-y-8!' : ''}
@@ -77,5 +82,5 @@
 		</div>
 	{/if}
 
-	<div class="self-start text-sm text-gray-500">{label ?? ''}</div>
+	<div class="self-start text-sm text-gray-400">{label ?? ''}</div>
 </div>

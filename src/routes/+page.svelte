@@ -21,7 +21,6 @@
 	const consumables = createCardStack()
 
 	let showDialog = $state<'win' | 'lose' | false>(false)
-
 	let roundScore = $state(0)
 	let handsLeft = $state(4)
 	let discardsLeft = $state(4)
@@ -75,9 +74,10 @@
 		discardsLeft--
 	}
 
-	function discardAndDraw() {
+	async function discardAndDraw() {
 		hand.remove(selected)
 		discard.add(selected)
+		await new Promise((resolve) => setTimeout(resolve, 200))
 		drawToHand(selected.length)
 		selected = []
 	}
@@ -103,7 +103,9 @@
 </Dialog>
 
 <div class="m-auto flex w-full flex-row items-center justify-between gap-2 p-4">
-	<div class="stats flex h-full max-w-xs flex-col gap-1 rounded p-2 ring">
+	<div
+		class="stats flex h-full max-w-xs flex-col gap-2 rounded bg-gray-800 p-2 text-gray-300 shadow"
+	>
 		<div class="p-4">
 			<h1 class="text-center text-4xl!">Svalatro</h1>
 		</div>
@@ -141,7 +143,7 @@
 	</div>
 
 	<div class="flex grow flex-col">
-		<div class="flex flex-row justify-end rounded p-2 ring">
+		<div class="flex flex-row justify-end rounded bg-gray-800 p-2">
 			<Stack stack={jokers} type="row" facing="up" label="Jokerz (0/{MAX_JOKERS})" class="grow" />
 			<Stack stack={consumables} type="row" facing="up" label="Consumables (0/{MAX_CONSUMABLES})" />
 		</div>
