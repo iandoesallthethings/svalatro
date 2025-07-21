@@ -26,7 +26,7 @@
 	let handsLeft = $state(4)
 	let discardsLeft = $state(4)
 
-	let handSort = $state<'rank' | 'suit' | 'none'>('rank')
+	let handSort = $state<'rank' | 'suit' | 'none'>('none')
 	let selected = $state<Card[]>([])
 	let scores = $derived(findViableHands(selected))
 
