@@ -40,9 +40,9 @@ h4 {
 }
 
 .panel {
-	@apply flex gap-2 rounded bg-gray-800 p-2 shadow;
+	@apply flex gap-2 rounded-lg bg-gray-800 p-2 shadow;
 }
 
 .stat-card {
-	@apply flex h-20 items-center justify-center gap-2 rounded-lg bg-gray-700 p-2 shadow;
+	@apply flex h-20 items-center justify-center gap-2 rounded bg-gray-700 p-2 shadow;
 }

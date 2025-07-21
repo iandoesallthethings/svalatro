@@ -10,9 +10,10 @@
 	import * as Timing from '$lib/Timing'
 
 	const MAX_SELECTED = 5
-	const BLIND_SCORE = 300
 	const MAX_JOKERS = 5
 	const MAX_CONSUMABLES = 2
+
+	let blind = $state(300)
 
 	const deck = createCardStack(Decks.standardDeck())
 	const hand = createCardStack()
@@ -30,9 +31,22 @@
 	let selected = $state<Card[]>([])
 	let scores = $derived(findViableHands(selected))
 
-	if (browser) {
+	if (browser) newRound()
+
+	async function newRound(advanceBlind = false) {
+		if (advanceBlind) blind = blind * 2
+
+		showDialog = false
+
+		await discardFromHand(hand.cards)
+		await reshuffleDiscard()
 		deck.shuffle()
-		drawToHand(8)
+
+		await drawToHand(8)
+		selected = []
+		handsLeft = 4
+		discardsLeft = 4
+		roundScore = 0
 	}
 
 	async function drawToHand(number: number) {
@@ -45,13 +59,21 @@
 		}
 	}
 
-	function toggleSort(newSort: 'rank' | 'suit') {
-		if (newSort === handSort) {
-			handSort = 'none'
-		} else {
-			handSort = newSort
-			hand.sort(handSort)
+	async function discardFromHand(cards: Card[]) {
+		for (const card of cards) {
+			hand.remove(card)
+			discard.add(card)
+			await Timing.wait()
 		}
+	}
+
+	async function reshuffleDiscard() {
+		for (const card of discard.cards) {
+			discard.remove(card)
+			deck.add(card, 'bottom')
+			await Timing.wait(25)
+		}
+		deck.shuffle()
 	}
 
 	async function playSelected() {
@@ -60,12 +82,14 @@
 		const actualScore = hand.score(hand.validate(cards))
 		roundScore += actualScore
 
-		await discardAndDraw()
+		await discardFromHand(selected)
+		await drawToHand(selected.length)
+		selected = []
 		handsLeft--
 
 		await Timing.wait()
 
-		if (roundScore >= BLIND_SCORE) {
+		if (roundScore >= blind) {
 			showDialog = 'win'
 		} else if (handsLeft === 0) {
 			showDialog = 'lose'
@@ -74,19 +98,19 @@
 
 	async function discardSelected() {
 		if (discardsLeft === 0) return
-		await discardAndDraw()
+		await discardFromHand(selected)
+		await drawToHand(selected.length)
+		selected = []
 		discardsLeft--
 	}
 
-	async function discardAndDraw() {
-		for (const card of selected) {
-			hand.remove(card)
-			discard.add(card)
-			await Timing.wait()
+	function toggleSort(newSort: 'rank' | 'suit') {
+		if (newSort === handSort) {
+			handSort = 'none'
+		} else {
+			handSort = newSort
+			hand.sort(handSort)
 		}
-
-		await drawToHand(selected.length)
-		selected = []
 	}
 
 	function toggleSelected(card?: Card | null) {
@@ -104,7 +128,7 @@
 	<h1>{showDialog === 'win' ? 'You win!' : 'You lose!'}</h1>
 	<div>You scored {roundScore} points.</div>
 
-	<button class="primary" onclick={() => (window.location.href = '/')}>
+	<button class="primary" onclick={() => newRound(showDialog === 'win')}>
 		{showDialog === 'win' ? 'Play' : 'Try'} again
 	</button>
 </Dialog>
@@ -117,7 +141,7 @@
 
 		<div class="stat-card">
 			<h1>Blind</h1>
-			<h1 class="text-4xl">{BLIND_SCORE}</h1>
+			<h1 class="text-4xl">{blind}</h1>
 		</div>
 
 		<div class="stat-card">
@@ -179,9 +203,9 @@
 						Play
 					</button>
 
-					<div class="flex flex-col items-center gap-1 rounded-lg border p-2">
+					<div class="panel flex-col items-center">
 						<div>Sort Hand</div>
-						<div class="flex flex-row gap-1">
+						<div class="flex flex-row justify-center gap-1">
 							<button
 								onclick={() => toggleSort('rank')}
 								class="secondary ring-yellow-500"
