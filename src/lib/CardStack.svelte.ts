@@ -1,4 +1,5 @@
 import { type Card, faceToValue } from './Cards'
+import { shuffleDeck } from './Shuffle'
 
 export interface CardStack {
 	cards: Card[]
@@ -15,7 +16,7 @@ export function createCardStack(initialCards: Card[] = []): CardStack {
 	let cards = $state(initialCards)
 
 	function shuffle() {
-		cards = cards.sort(() => Math.random() - 0.5)
+		cards = shuffleDeck(cards)
 	}
 
 	function sort(by: 'rank' | 'suit') {

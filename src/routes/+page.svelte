@@ -184,16 +184,16 @@
 						<div class="flex flex-row gap-1">
 							<button
 								onclick={() => toggleSort('rank')}
-								class="secondary"
-								class:ring!={handSort === 'rank'}
+								class="secondary ring-yellow-500"
+								class:ring-3!={handSort === 'rank'}
 							>
 								Rank
 							</button>
 
 							<button
 								onclick={() => toggleSort('suit')}
-								class="secondary"
-								class:ring!={handSort === 'suit'}
+								class="secondary ring-yellow-500"
+								class:ring-3!={handSort === 'suit'}
 							>
 								Suit
 							</button>
@@ -223,7 +223,3 @@
 		</div>
 	</div>
 </div>
-
-<style lang="postcss">
-	@reference "tailwindcss";
-</style>

@@ -8,7 +8,7 @@ button:not(.unstyled) {
 button.primary {
 	@apply bg-blue-500 text-white;
 	@apply hover:bg-blue-600;
-	@apply disabled:bg-blue-300;
+	@apply disabled:bg-blue-400;
 }
 
 button.secondary {
@@ -20,7 +20,7 @@ button.secondary {
 button.danger {
 	@apply bg-red-500 text-white;
 	@apply hover:bg-red-600;
-	@apply disabled:bg-red-300;
+	@apply disabled:bg-red-400;
 }
 
 h1 {
