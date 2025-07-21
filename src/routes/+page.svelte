@@ -22,7 +22,7 @@
 	const jokers = createCardStack()
 	const consumables = createCardStack()
 
-	let showDialog = $state<'win' | 'lose' | false>(false)
+	let gameState = $state<'win' | 'lose' | 'playing'>('playing')
 	let roundScore = $state(0)
 	let handsLeft = $state(4)
 	let discardsLeft = $state(4)
@@ -36,7 +36,7 @@
 	async function newRound(advanceBlind = false) {
 		if (advanceBlind) blind = blind * 2
 
-		showDialog = false
+		gameState = 'playing'
 
 		await discardFromHand(hand.cards)
 		await reshuffleDiscard()
@@ -51,6 +51,7 @@
 
 	async function drawToHand(number: number) {
 		for (const n of Array(number)) {
+			flipSound('card-flip')
 			const card = deck.draw()
 			hand.add(card, 'bottom')
 			if (handSort !== 'none') hand.sort(handSort)
@@ -61,6 +62,7 @@
 
 	async function discardFromHand(cards: Card[]) {
 		for (const card of cards) {
+			flipSound('card-flip')
 			hand.remove(card)
 			discard.add(card)
 			await Timing.wait()
@@ -69,6 +71,7 @@
 
 	async function reshuffleDiscard() {
 		for (const card of discard.cards) {
+			flipSound('card-flip')
 			discard.remove(card)
 			deck.add(card, 'bottom')
 			await Timing.wait(25)
@@ -90,9 +93,9 @@
 		await Timing.wait()
 
 		if (roundScore >= blind) {
-			showDialog = 'win'
+			gameState = 'win'
 		} else if (handsLeft === 0) {
-			showDialog = 'lose'
+			gameState = 'lose'
 		}
 	}
 
@@ -115,21 +118,30 @@
 
 	function toggleSelected(card?: Card | null) {
 		if (card == null) return
+
 		const isAlreadySelected = selected.some((selectedCard) => selectedCard.id === card.id)
 		if (isAlreadySelected) {
+			flipSound('card-slide')
 			selected = selected.filter((selectedCard) => selectedCard.id !== card.id)
 		} else if (selected.length < MAX_SELECTED) {
+			flipSound('card-slide')
 			selected = [...selected, card]
 		}
 	}
+
+	async function flipSound(name: string) {
+		const sound = new Audio(`/sounds/${name}.mp3`)
+		await sound.play()
+		sound.addEventListener('ended', () => sound.remove(), { once: true })
+	}
 </script>
 
-<Dialog show={showDialog !== false}>
-	<h1>{showDialog === 'win' ? 'You win!' : 'You lose!'}</h1>
+<Dialog show={gameState !== 'playing'}>
+	<h1>{gameState === 'win' ? 'You win!' : 'You lose!'}</h1>
 	<div>You scored {roundScore} points.</div>
 
-	<button class="primary" onclick={() => newRound(showDialog === 'win')}>
-		{showDialog === 'win' ? 'Play' : 'Try'} again
+	<button class="primary" onclick={() => newRound(gameState === 'win')}>
+		{gameState === 'win' ? 'Next Blind' : 'Try Again'}
 	</button>
 </Dialog>
 
@@ -146,7 +158,7 @@
 
 		<div class="stat-card">
 			<h3 class="w-1/3">Round Score</h3>
-			<h3 class="w-2/3 text-center">{roundScore}</h3>
+			<h1 class="w-2/3 text-center">{roundScore}</h1>
 		</div>
 
 		<div class="stat-card flex-col">
@@ -191,7 +203,7 @@
 		</div>
 
 		<div class="flex w-full grow flex-row gap-2">
-			<div class="play-area flex w-22 grow flex-col justify-center gap-2">
+			<div class="play-area flex w-22 grow flex-col justify-end gap-2">
 				<Stack stack={hand} {selected} facing="up" type="row" fan={true} onclick={toggleSelected} />
 
 				<div class="controls flex flex-row justify-center gap-2">

@@ -28,12 +28,12 @@
 	}: Props = $props()
 
 	function fanStyle(index: number) {
-		const derp = stack.cards.length % 2 === 0 ? 0.5 : 1
+		const derp = stack.cards.length % 2 === 0 ? 0.5 : 0
 
-		const adjustedIndex = index + derp - 0.5 * stack.cards.length
+		const adjustedIndex = index + derp - Math.floor(0.5 * stack.cards.length)
 
 		const angle = adjustedIndex * 2
-		const y = Math.abs(adjustedIndex) * 2
+		const y = adjustedIndex ** 2
 
 		return `
 			transform: 
@@ -64,7 +64,7 @@
 		</div>
 	{:else if type === 'row'}
 		<div
-			class="flex h-44 w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-20 pl-2"
+			class="flex h-48 w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-20 pl-4"
 		>
 			{#if stack.cards.length === 0}
 				<CardComponent card={null} facing="down" class="mr-auto" />
@@ -76,7 +76,7 @@
 					animate:flip={{ duration: 200 }}
 					in:receive={{ key: card.id }}
 					out:send={{ key: card.id }}
-					class="group relative flex h-32 w-24 shrink"
+					class="group relative flex h-32 w-24 shrink origin-bottom"
 					style={fan ? fanStyle(index) : ''}
 				>
 					<CardComponent
