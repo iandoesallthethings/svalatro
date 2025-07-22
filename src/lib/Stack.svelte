@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Facing, StackType, Card } from './Cards'
 	import CardComponent from './Card.svelte'
-	import { type CardStack } from './CardStack.svelte'
+	import type { CardStack } from './CardStack.svelte'
 	import { flip } from 'svelte/animate'
 	import { receive, send } from './transition'
 
@@ -43,7 +43,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-1 {className} pb-2">
+<div class="flex flex-col gap-1 pb-2 {className}">
 	{#if type === 'deck'}
 		<div class="relative mt-4 flex h-32 w-24 flex-col gap-2">
 			{#if stack.cards.length === 0}
@@ -63,9 +63,7 @@
 			{/each}
 		</div>
 	{:else if type === 'row'}
-		<div
-			class="flex h-48 w-full flex-row flex-nowrap justify-center gap-4 overflow-x-auto pt-8 pr-20 pl-4"
-		>
+		<div class="flex h-54 flex-row justify-center gap-4 overflow-x-auto pt-8 pr-20 pl-4">
 			{#if stack.cards.length === 0}
 				<CardComponent card={null} facing="down" class="mr-auto" />
 			{/if}

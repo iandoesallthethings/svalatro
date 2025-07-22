@@ -2,7 +2,7 @@
 @plugin '@tailwindcss/typography';
 
 button:not(.unstyled) {
-	@apply w-min rounded px-4 py-2 whitespace-nowrap shadow;
+	@apply w-min rounded-lg px-4 py-2 whitespace-nowrap shadow;
 }
 
 button.primary {
