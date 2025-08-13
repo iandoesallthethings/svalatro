@@ -8,6 +8,7 @@
 	import Stack from '$lib/Stack.svelte'
 	import * as Strings from '$lib/Strings'
 	import * as Timing from '$lib/Timing'
+	import * as Audio from '$lib/Audio.svelte'
 
 	const MAX_SELECTED = 5
 	const MAX_JOKERS = 5
@@ -51,7 +52,7 @@
 
 	async function drawToHand(number: number) {
 		for (const n of Array(number)) {
-			flipSound('card-flip')
+			Audio.playSound('card-flip')
 			const card = deck.draw()
 			hand.add(card, 'bottom')
 			if (handSort !== 'none') hand.sort(handSort)
@@ -62,7 +63,7 @@
 
 	async function discardFromHand(cards: Card[]) {
 		for (const card of cards) {
-			flipSound('card-flip')
+			Audio.playSound('card-flip')
 			hand.remove(card)
 			discard.add(card)
 			await Timing.wait()
@@ -71,7 +72,7 @@
 
 	async function reshuffleDiscard() {
 		for (const card of discard.cards) {
-			flipSound('card-flip')
+			Audio.playSound('card-flip')
 			discard.remove(card)
 			deck.add(card, 'bottom')
 			await Timing.wait(25)
@@ -121,18 +122,12 @@
 
 		const isAlreadySelected = selected.some((selectedCard) => selectedCard.id === card.id)
 		if (isAlreadySelected) {
-			flipSound('card-slide')
+			Audio.playSound('card-slide')
 			selected = selected.filter((selectedCard) => selectedCard.id !== card.id)
 		} else if (selected.length < MAX_SELECTED) {
-			flipSound('card-slide')
+			Audio.playSound('card-slide')
 			selected = [...selected, card]
 		}
-	}
-
-	async function flipSound(name: string) {
-		const sound = new Audio(`/sounds/${name}.mp3`)
-		await sound.play()
-		sound.addEventListener('ended', () => sound.remove(), { once: true })
 	}
 </script>
 
@@ -181,6 +176,12 @@
 				<h2>Discards</h2>
 				<h2>{discardsLeft}</h2>
 			</div>
+		</div>
+
+		<div class="stat-card">
+			<button class="secondary" onclick={Audio.toggleMute}>
+				{Audio.getMute() ? '🔇' : '🔈'}
+			</button>
 		</div>
 	</div>
 

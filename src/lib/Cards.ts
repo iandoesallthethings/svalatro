@@ -4,6 +4,16 @@ export type Facing = 'up' | 'down'
 export type StackType = 'row' | 'column' | 'deck'
 
 export const suits = {
+	spades: {
+		name: 'spades',
+		emoji: '♠',
+		color: 'text-black'
+	},
+	hearts: {
+		name: 'hearts',
+		emoji: '♥',
+		color: 'text-red-500'
+	},
 	clubs: {
 		name: 'clubs',
 		emoji: '♣',
@@ -13,16 +23,6 @@ export const suits = {
 		name: 'diamonds',
 		emoji: '♦',
 		color: 'text-orange-500'
-	},
-	hearts: {
-		name: 'hearts',
-		emoji: '♥',
-		color: 'text-red-500'
-	},
-	spades: {
-		name: 'spades',
-		emoji: '♠',
-		color: 'text-black'
 	}
 }
 
